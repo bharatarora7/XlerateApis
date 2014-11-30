@@ -1,0 +1,31 @@
+{
+	"id": "eb412fc3-6f7b-67ec-f381-27dad37f673b",
+	"name": "XlerateApis",
+	"requests": [
+		{
+			"id": "b553d63b-bbe9-0e04-9fe9-3a31d027c000",
+			"headers": "Authorization: Basic MTIzNDpiaGFyYXQ=\nContent-Type: application/json\n",
+			"url": "http://localhost:8080/profile/retrieveProfiles",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"name": "RetrieveProfiles",
+			"description": "RetrieveProfiles",
+			"descriptionFormat": "html",
+			"time": 1417336735959,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"collectionId": "eb412fc3-6f7b-67ec-f381-27dad37f673b",
+			"synced": false,
+			"rawModeData": "{\"ids\":\"1,2,3,4,5\"}"
+		}
+	],
+	"order": [
+		"b553d63b-bbe9-0e04-9fe9-3a31d027c000"
+	],
+	"timestamp": 1417336735959,
+	"synced": false
+}

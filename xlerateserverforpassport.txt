@@ -1,0 +1,186 @@
+xlerateservercopforpassport
+
+
+// Starting the server with framework 
+var handlerError = require('./errorresponsehandler');
+var mongoose = require('mongoose');
+var passport = require('passport');
+function Start()
+ {
+    
+    // Reading routes from configuration file     
+    //var controllerPath = __dirname + "\\Controllers";
+
+    var fs = require('fs'),
+        path = require('path');
+    var base = path.resolve('.');
+    
+// Keeping all the user specific routes files inside the Controllers directory
+    var controllerPath = base + '\\Controllers';
+    
+// Keeping the routes for security inside the security folder
+    var frmkSecurityhandler = base + '\\XlerateApi\\Security';
+    
+
+    var baseRoutes = [];
+    // adding the paths for user defined handlers and security handlers
+    baseRoutes.push(controllerPath);
+    baseRoutes.push(frmkSecurityhandler);
+
+    var rcollection = require('./routecollection');
+
+    var routecollection = new rcollection();
+    var res = [];
+
+    for (var i = 0; i < baseRoutes.length; i++) {
+        LoadModules(baseRoutes[i]);
+    }
+    function LoadModules(pathFile) {
+        
+        // Read all the files from the  Controllers folder
+        //var requesthandler = require("./Controllers/requestHandler");        
+        
+        fs.lstat(pathFile, function (err, stat) {
+            if (stat.isDirectory()) {
+                // we have a directory: do a tree walk
+                fs.readdir(pathFile, function (err, files) {
+                    var f, l = files.length;
+                    for (var i = 0; i < l; i++) {
+                        f = path.join(pathFile, files[i]);
+                        LoadModules(f);
+                    }
+                });
+            } else {
+                // we have a file: load it
+                var pathRoute = "";
+                var requireFile = require(pathFile);
+                var controllerName = path.basename(pathFile, '.js');
+                // Checking for file names ending with Handler or Controller
+                var index = controllerName.search("Handler");
+                if (index === -1) { 
+                index = controllerName.search("Controller");                
+                }
+
+                if (index !== -1) {
+                    baseRouteName = controllerName.substring(-1, index);
+                    var routeObject = {};
+                    
+                    for (var m in requireFile) {
+                        actionName = String(m);
+                        if (typeof requireFile[m] === 'function') {
+                            // get the object from the routemapper and add it inside the addRoute  
+                            routecollection.addRoute(baseRouteName.toLowerCase(), actionName.toLowerCase()  , requireFile[m]);
+                        }
+                // res.push(m);
+                    }
+                }
+                
+            }
+        });      
+    }
+    
+    httpstart_server();
+}
+
+
+//Starting the server
+    function httpstart_server()
+    {
+        var hserver = require("./httpserver");   
+         hserver.start();
+    }
+
+function onrequesthandle(pathname, request, response, postData) {
+    
+    //Creating the Context object based on the req, res and data
+    createContext(request, response, postData);
+    var actioninvoker;
+    var rhandler = require("./routehandler");
+    var responseHandler = require("./responsehandler");
+    try {
+         actioninvoker = rhandler.validateRoute(pathname, Context.request, Context.response, Context.postData);
+    }
+    catch (exp) {        
+        handlerError.handleError(exp);
+        return;
+    }
+    
+    // before handling the response check for the prehandler and invoke like security handler
+    var authHandler = require("./Security/authhandler");
+       
+
+    //passport.initialize();
+    //request.body = JSON.parse(postData);; 
+    
+    //passport.session();
+    //authHandler.isClientAuthenticated(request, response,function(err)
+      //  {
+     //   if (err)
+     //       var errrr = "error for auth";
+        //request.logIn(user, function (errrr) {
+        //    if (errrr)
+                
+        //        console.log("eeee");
+        
+        //});
+           
+            // invoke the handle response asynchronously
+            if ((actioninvoker !== undefined) && (response !== undefined) && (response !== null)) {
+                
+                //******************
+                ///////
+                // Invoking the response hander asynchronously 
+                //////
+                
+                var async_function = responseHandler.handleResponse;
+                ////Using process.nextTick for heavy computing tasks
+                ////No process/nextTick should be called recursively, please refer below link
+                ////http://nodejs.org/api/process.html#process_process_nexttick_callback
+                process.nextTick(function () {
+                    async_function(actioninvoker, request, response, postData, function (err, result) {
+                        
+                        if (err) {
+                            handlerError.handleError(err);
+                            return;
+                        }
+                    });
+                });
+        
+        ///else  if do not need process.nexttick then use the function which is without event loop queue
+        //async_function(actioninvoker, request, response, postData, function (err, result) { 
+        //    if (err) {
+        //        handlerError.handleError(err);
+        //    }
+        //});
+
+        //var xx = responseHandler.handleResponse;
+        //async(actioninvoker, request, response, postData, xx);                    
+        //////////
+        // End of async response handling
+        /////////
+        //******************
+            return;
+           }
+            else
+                return;
+        //});
+}
+
+//function async(actioninvoker, request, response, postData, callback) {
+//    callback(actioninvoker, request, response, postData, function (err, result) {       
+//            if (err) {
+//                  handlerError.handleError(err);            
+//            }
+//    });
+//    return
+//   }
+
+function createContext(request, response, postData) {
+    Context.request = request;
+    Context.response = response;
+    Context.postData = postData;
+
+}
+
+exports.Start = Start;
+exports.onrequesthandle = onrequesthandle;

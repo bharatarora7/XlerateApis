@@ -29,13 +29,11 @@ querystring.parse(postData).text);
 response.end();
 }
 
-
-
 //GetProfile Handler
 function getProfile(id, fields) {
     var Profile = {};
     
-    if (id != "" || id != null)
+    if (id !== "" && id !== null)
         Profile.id = id;
     else
         throw new Error("Profile does not exists");
@@ -45,7 +43,7 @@ function getProfile(id, fields) {
     
     Profile.gender = "Male";
     Profile.isActive = "True";
-    
+    if (fields !== null)
     var attrs = fields.split(',');
     
     return Profile;
@@ -56,9 +54,9 @@ function retrieveProfiles(ids) {
    var Profiles =[];
     //var Profile = {};
     
-    var Profile = new Object();
+    var Profile = {};
     
-    if (ids != "" || ids != null)
+    if (ids !== "" || ids !== null)
         Profile.id = "1";
     else
         throw new Error("Profile does not exists");
@@ -71,7 +69,7 @@ function retrieveProfiles(ids) {
     
     Profiles.push(Profile);
 
-    Profile = new Object();
+    Profile = {};
     Profile.id = "2";
     Profile.name = "Rajan M";
     Profile.email = "Rajan.M@gmail.com";
@@ -83,6 +81,7 @@ function retrieveProfiles(ids) {
     return Profiles;
     
 }
+
 
 //Export methods which are required to be part of routes or
 // the methods we need routes to be created
