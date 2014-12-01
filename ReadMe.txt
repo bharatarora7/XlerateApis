@@ -1,4 +1,11 @@
 //Bharat Arora
+//* Merged httpserver into XlerateAPIserver
+//* Added a Switch for Security
+//* Based on Security added a user dependency inside MongoDB
+//* Provided the Mongo DB data also incase user want use the same
+//* Provided a fiddler session and Postman session to test the APIs
+
+
 /// For security 
 enabling the security pass the sproject properties script arguments as -s  (without security and without mongo db dependency)
 for without security pass the -ws argument 
